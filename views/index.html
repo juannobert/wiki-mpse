@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wiki de Chamados - TI</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Wiki de Chamados</h1>
+      <button id="btn-toggle-modal" class="btn-primary">+ Novo Artigo</button>
+    </header>
+
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="Buscar por erro, palavra-chave ou tag...">
+    </div>
+
+    <main id="articles-list"></main>
+  </div>
+
+  <!-- Modal Formulário -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Novo Artigo de Suporte</h2>
+      <form id="article-form">
+        <label>Título do Problema</label>
+        <input type="text" id="title" required placeholder="Ex: Impressora HP não responde no Windows 11">
+        
+      <label for="category">Categoria</label>
+      <div style="display: flex; gap: 8px;">
+        <select id="category" required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </select>
+        <button type="button" id="btn-add-category" class="btn-secondary" title="Cadastrar nova categoria">+</button>
+      </div>
+        <label>Tags (separadas por vírgula)</label>
+        <input type="text" id="tags" placeholder="Ex: impressora, spooler, win11">
+
+        <label>Sintoma / Erro Relatado</label>
+        <textarea id="problem" rows="3" required placeholder="Descreva o erro ou cole a mensagem exata..."></textarea>
+
+        <label>Passo a Passo da Solução</label>
+        <textarea id="solution" rows="6" required placeholder="1. Abra o CMD como admin..."></textarea>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel" class="btn-secondary">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar no Disco (.md)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

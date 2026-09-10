@@ -1,0 +1,36 @@
+# Dependências do Node (pasta pesada)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos de ambiente e chaves secretas (se usar no futuro)
+.env
+.env.local
+.env.production
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Configurações de Editores / IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# --- DADOS DO BANCO / ARQUIVOS DA WIKI ---
+# Ignora os artigos .md criados durante os testes para não poluir o repositório
+content/*.md
+!content/liberacao-de-acesso.md
+
+# Ignora as imagens enviadas via Upload
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Arquivo de categorias gerado dinamicamente (descomente se NÃO quiser salvar as novas no Git)
+# categories.json
