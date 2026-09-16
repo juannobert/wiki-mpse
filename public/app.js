@@ -9,6 +9,7 @@ const modal = document.getElementById('modal');
 const form = document.getElementById('article-form');
 const categorySelect = document.getElementById('category');
 const btnAddCategory = document.getElementById('btn-add-category');
+const solutionTextarea = document.getElementById('solution');
 
 // 1. Carregar Artigos
 async function fetchArticles(page = 1, searchQuery = '') {
@@ -172,6 +173,31 @@ async function deleteArticle(id) {
     fetchArticles(currentPage, searchInput.value);
   }
 }
+solutionTextarea.addEventListener('paste', async (e) => {
+  const items = e.clipboardData.items;
+  
+  for (let item of items) {
+    if (item.type.indexOf('image') !== -1) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Envia a imagem para o backend
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await res.json();
+      
+      // Insere o atalho Markdown da imagem no local do cursor
+      const markdownImage = `\n![Print do Erro](${data.imageUrl})\n`;
+      solutionTextarea.setRangeText(markdownImage, solutionTextarea.selectionStart, solutionTextarea.selectionEnd, 'end');
+    }
+  }
+});
 
 // Inicialização
 loadCategories();

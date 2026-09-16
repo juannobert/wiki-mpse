@@ -4,6 +4,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,9 +13,34 @@ const app = express();
 const PORT = 3000;
 const CONTENT_DIR = path.join(__dirname, 'content');
 const CATEGORIES_FILE = path.join(__dirname, 'categories.json');
+const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Configuração do Multer para Salvamento Local de Imagens
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, UPLOAD_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueName = `img-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB por foto
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos de imagem são permitidos!'));
+    }
+  }
+});
 
 const DEFAULT_CATEGORIES = [
   "Hardware",
@@ -26,7 +52,21 @@ const DEFAULT_CATEGORIES = [
   "Geral"
 ];
 
-// 1. API: Obter Categorias
+// 1. API: Upload de Imagem
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    }
+    // Retorna o caminho relativo acessível pela web
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, imageUrl });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao processar o upload da imagem' });
+  }
+});
+
+// 2. API: Obter Categorias
 app.get('/api/categories', async (req, res) => {
   try {
     const data = await fs.readFile(CATEGORIES_FILE, 'utf-8');
@@ -36,7 +76,7 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-// 2. API: Cadastrar Nova Categoria
+// 3. API: Cadastrar Categoria
 app.post('/api/categories', async (req, res) => {
   try {
     const { name } = req.body;
@@ -56,7 +96,7 @@ app.post('/api/categories', async (req, res) => {
   }
 });
 
-// 3. API: Listar Chamados (com Paginação e Busca)
+// 4. API: Listar Chamados (com Paginação e Busca)
 app.get('/api/articles', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -107,7 +147,7 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
-// 4. API: Salvar Novo Artigo .md
+// 5. API: Salvar Novo Artigo .md
 app.post('/api/articles', async (req, res) => {
   try {
     const { title, category, tags, problem, solution } = req.body;
@@ -141,7 +181,7 @@ ${solution}
   }
 });
 
-// 5. API: Editar Artigo Existente
+// 6. API: Editar Artigo Existente
 app.put('/api/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -176,7 +216,7 @@ ${solution}
   }
 });
 
-// 6. API: Excluir Artigo
+// 7. API: Excluir Artigo
 app.delete('/api/articles/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -191,10 +231,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// Inicialização segura dentro de função async
+// Inicialização segura das pastas e do servidor
 async function startServer() {
   try {
     await fs.mkdir(CONTENT_DIR, { recursive: true });
+    await fs.mkdir(UPLOAD_DIR, { recursive: true });
+
     try {
       await fs.access(CATEGORIES_FILE);
     } catch {
@@ -203,7 +245,7 @@ async function startServer() {
 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n==================================================`);
-      console.log(` Wiki de Chamados rodando com sucesso!`);
+      console.log(` Wiki de Chamados rodando com suporte a Uploads!`);
       console.log(` Acesse: http://localhost:${PORT}`);
       console.log(`==================================================\n`);
     });
